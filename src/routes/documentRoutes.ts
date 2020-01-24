@@ -33,7 +33,7 @@ router.get('/_id/:_id', async (req, res) => {
     try {
         const document = (await findDocument({_id: req.params._id}))
         if (document) return res.json(document)
-        return res.status(404).json({})
+        return res.status(404).json({error: `Document ${req.params._id} not found`})
     } catch(e) {
         return res.json({error: e.message})
     }

@@ -15,13 +15,19 @@ const query = new GraphQLObjectType({
             type: DocType,
             args: { _id: { type: GraphQLID }},
             async resolve(parent, args) {
-                return await findDocument({_id: args._id})
+                return (await findDocument({_id: args._id}))[0]
             }
         },
         documents: {
             type: new GraphQLList(DocType),
             async resolve(parent, args) {
                 return await findDocument({})
+            }
+        },
+        parentDocuments: {
+            type: new GraphQLList(DocType),
+            async resolve(parent, args) {
+                return await findDocument({childOf: null})
             }
         },
         user: {
