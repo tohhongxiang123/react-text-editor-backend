@@ -5,8 +5,8 @@ const makeAddDocument = (db : IDocumentDB) => async (documentInfo: Document) : P
     if (!documentInfo.description.trim()) throw new Error('Description required')
     if (!documentInfo.body.trim()) throw new Error('Body required')
     
-    if (documentInfo.childOf) {
-        const parent = await db.find({_id: documentInfo.childOf})
+    if (documentInfo.childof) {
+        const parent = await db.find({_id: documentInfo.childof})
         if (parent.length === 0) throw new Error('Parent not found')
     }
 
@@ -15,7 +15,7 @@ const makeAddDocument = (db : IDocumentDB) => async (documentInfo: Document) : P
         ...documentInfo,
         title: documentInfo.title.trim(), 
         description: documentInfo.description.trim(), 
-        body: documentInfo.description.trim()
+        body: documentInfo.body.trim()
     })
 
     return response

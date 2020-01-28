@@ -15,7 +15,7 @@ const UserType = new GraphQLObjectType({
         documents: {
             type: GraphQLList(DocType),
             resolve(parent, args) {
-                return findDocument({authorId: parent._id})
+                return findDocument({authorid: parent._id})
             }
         }
     })

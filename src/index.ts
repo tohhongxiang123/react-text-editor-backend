@@ -1,17 +1,11 @@
-const express = require('express')
-const graphqlHTTP = require('express-graphql')
-const cors = require('cors')
-const mongoose = require('mongoose')
+import * as express from 'express'
+import * as graphqlHTTP from 'express-graphql'
+import * as cors from 'cors'
 require('dotenv').config()
 
 import documentRoutes from './routes/documentRoutes'
 import userRoutes from './routes/userRoutes'
 import schema from './schema'
-
-mongoose.connect(process.env.MONGODB_URI, {useNewUrlParser: true, useUnifiedTopology: true}, (err, client) => {
-    if (err) return console.log(err)
-    console.log(`Connected to mongoDB: ${process.env.MONGODB_URI}`)
-})
 
 const app = express()
 

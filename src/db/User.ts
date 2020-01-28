@@ -1,5 +1,5 @@
-import mongoose = require('mongoose')
 import { IDB } from './index'
+import { Pool } from 'pg'
 
 export type User = {
     username: string,
@@ -10,20 +10,13 @@ export type User = {
 export const MIN_PASSWORD_LENGTH = 6
 export const MIN_USERNAME_LENGTH = 3
 
-const Schema = mongoose.Schema
-const userSchema = new Schema({
-    username: {
-        type: String,
-        required: true
-    },
-    password: {
-        type: String,
-        required: true,
-        min: MIN_PASSWORD_LENGTH
-    }
+const pool = new Pool({
+    user: process.env.PGUSER,
+    password: process.env.PGPASSWORD,
+    host: process.env.PGHOST,
+    port: parseInt(process.env.PORT),
+    database: process.env.DATABASE
 })
-
-const User = mongoose.model('User', userSchema)
 
 export interface IUserDB extends IDB<User> {}
 
@@ -36,29 +29,38 @@ export default () : IUserDB => {
     })
 
     async function create(userInfo : User) : Promise<User> {
-        const user = new User(userInfo)
-        const response = await user.save()
-        return response
+        const response = await pool.query(`
+            INSERT INTO users (username, password) 
+            VALUES ($1, $2)
+            RETURNING _id, username`,
+            [userInfo.username, userInfo.password]
+        )
+        return response.rows[0]
     }
 
     async function find(query : {username?: string, _id?: string}) : Promise<User[]> {
-        if (query.hasOwnProperty('_id') && !query._id.toString().match(/^[0-9a-fA-F]{24}$/)) throw new Error("Invalid ID")
-
-        const results = await User.find(query)
-        return results.map(result => result.toObject())
+        // COALESCE returns '%' if variable is null
+        const {rows} = await pool.query(`
+            SELECT _id, username, password FROM users WHERE
+            ($1::text IS NULL OR username = $1) AND
+            ($2::uuid IS NULL OR _id = $2)
+        `, [query.username, query._id])
+        return rows
     }
 
-    async function update(_id: string, changes: any) : Promise<{modifiedCount: number, _id: string}> {
-        if (!_id.match(/^[0-9a-fA-F]{24}$/)) throw new Error("Invalid ID")
-        const response = await User.updateOne({_id}, {$set: changes})
+    async function update(_id: string, changes: User) : Promise<{modifiedCount: number, _id: string}> {
+        const response = await pool.query(`
+            UPDATE users
+            SET username=$1, password=$2
+            WHERE _id::text = $3
+        `, [changes.username, changes.password, _id])
 
-        const modifiedCount = response.nModified
-        return {modifiedCount, _id}
+        return {modifiedCount: response.rowCount, _id}
     }
 
     async function remove(_id: string) : Promise<{deletedCount: number, _id: string}> {
-        const {deletedCount} = await User.deleteOne({_id: mongoose.Types.ObjectId(_id)})
-        
-        return {deletedCount, _id}
+        const response = await pool.query(`DELETE FROM users WHERE _id::text=$1`, [_id])
+        console.log('REMOVE', response)
+        return {deletedCount: 1, _id}
     }
 }

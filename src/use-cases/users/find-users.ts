@@ -1,6 +1,10 @@
 import { IUserDB } from "../../db/User";
 
 export default (db: IUserDB) => async (query: any) => {
-    const users = await db.find(query)
+    let users = await db.find(query)
+    users = users.map(user => {
+        delete user.password
+        return user
+    })
     return users
 }

@@ -1,12 +1,14 @@
-import {IDocumentDB} from '../../db/Document'
+import {IDocumentDB, Document} from '../../db/Document'
 
-const makeUpdateDocument = (db : IDocumentDB) => async (_id : string, changes : Object) : Promise<{modifiedCount: number, _id: string}> => {
-    if (!_id.match(/^[0-9a-fA-F]{24}$/)) throw new Error("Invalid ID") 
+const makeUpdateDocument = (db : IDocumentDB) => async (_id : string, changes : Document) : Promise<{modifiedCount: number, _id: string}> => {
+    const documents = await db.find({_id})
+    if (documents.length === 0) throw new Error('Document not found')
+
+    const updatedDocument = {
+        ...documents[0], ...changes
+    }
     
-    const document = await db.find({_id})
-    if (document.length === 0) throw new Error('Document not found')
-
-    const response = await db.update(_id, changes)
+    const response = await db.update(_id, updatedDocument)
     return response
 }
 

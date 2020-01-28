@@ -19,23 +19,23 @@ router.get('/', async (req, res) => {
 })
 
 router.post('/create', async (req, res) => {
-    const {title, description, body, authorId, childOf} = req.body
+    const {title, description, body, authorid, childof} = req.body
 
     try {
-        const response = await addDocument({title, description, body, authorId, childOf})
+        const response = await addDocument({title, description, body, authorid, childof})
         return res.json(response)
     } catch(e) {
-        return res.json({error: e.message})
+        return res.status(400).json({error: e.message})
     }
 })
 
 router.get('/_id/:_id', async (req, res) => {
     try {
-        const document = (await findDocument({_id: req.params._id}))
+        const document = await findDocument({_id: req.params._id})
         if (document) return res.json(document)
         return res.status(404).json({error: `Document ${req.params._id} not found`})
     } catch(e) {
-        return res.json({error: e.message})
+        return res.status(400).json({error: e.message})
     }
 })
 
@@ -47,7 +47,7 @@ router.post('/_id/:_id', async (req, res) => {
         const response = await updateDocument(_id, changes)
         return res.json(response)
     } catch(e) {
-        return res.json({error: e.message})
+        return res.status(400).json({error: e.message})
     }
 })
 

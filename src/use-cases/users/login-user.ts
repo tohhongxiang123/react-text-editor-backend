@@ -9,5 +9,5 @@ export default (db: IUserDB, checkPassword: (password: string, hashedPassword: s
 
     if (!isValid) throw new Error('Incorrect Password')
 
-    return generateToken({_id: user._id})
+    return generateToken({_id: user._id, username: user.username})
 }

@@ -12,11 +12,12 @@ const DocType = new GraphQLObjectType({
     name: 'Document',
     fields: () => ({
         _id: { type: GraphQLID },
-        childOf: { type: GraphQLID },
+        childof: { type: GraphQLID },
         children: {
             type: GraphQLList(DocType),
             async resolve(parent, args) {
-                return await findDocument({childOf: parent._id})
+                const children = await findDocument({childof: parent._id})
+                return children
             }
         },
         title: { type: GraphQLString },
@@ -25,7 +26,8 @@ const DocType = new GraphQLObjectType({
         author: {
             type: UserType,
             async resolve(parent, args) {
-                return (await findUsers({_id: parent.authorId}))[0]
+                const user = (await findUsers({_id: parent.authorid}))[0]
+                return user
             }
         }
     })
