@@ -1,6 +1,6 @@
 import { IUserDB } from "../../db/User";
 
-export default (db: IUserDB, checkPassword: (password: string, hashedPassword: string) => boolean, generateToken: (payload: object) => string) => async (username: string, password: string) => {
+export default (db: IUserDB, checkPassword: (password: string, hashedPassword: string) => boolean, generateToken: (payload: {_id: string, username: string}) => string) => async (username: string, password: string) => {
     const users = await db.find({username})
     if (users.length < 1) throw new Error('User not found')
 

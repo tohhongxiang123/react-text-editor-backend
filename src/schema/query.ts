@@ -5,8 +5,10 @@ import {
 } from 'graphql'
 import DocType from './DocType'
 import UserType from './UserType'
+import PageType from './PageType'
 import { findDocument } from '../use-cases/documents'
 import { findUsers } from '../use-cases/users'
+import { findPages } from '../use-cases/pages'
 
 const query = new GraphQLObjectType({
     name: 'RootQueryType',
@@ -34,14 +36,35 @@ const query = new GraphQLObjectType({
         user: {
             type: UserType,
             args: {_id: { type: GraphQLID}},
-            resolve(parent, args) {
-                return findUsers({_id: args._id})
+            async resolve(parent, args) {
+                return await findUsers({_id: args._id})
             }
         },
         users: {
             type: new GraphQLList(UserType),
             async resolve(parent, args) {
-                return findUsers({})
+                return await findUsers({})
+            }
+        },
+        userPages: {
+            type: new GraphQLList(PageType),
+            args: {userid: { type: GraphQLID }},
+            async resolve(parent, args) {
+                if (args.userid === null) return []
+                return await findPages({authorid: args.userid})
+            }
+        },
+        pages: {
+            type: new GraphQLList(PageType),
+            async resolve(parent, args) {
+                return await findPages({})
+            }
+        },
+        pageDocuments: {
+            type: new GraphQLList(PageType),
+            args: { pageId: {type: GraphQLID }},
+            async resolve(parent, args) {
+                return await findPages({_id: args.pageId})
             }
         }
     }

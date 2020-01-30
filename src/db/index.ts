@@ -1,5 +1,6 @@
 import makeDocumentDb from './Document'
 import makeUserDb from './User'
+import makePageDb from './Page'
 
 export interface IDB<T> {
     create: (information : T) => Promise<T>
@@ -10,8 +11,10 @@ export interface IDB<T> {
 
 const documentDb = makeDocumentDb()
 const userDb = makeUserDb()
+const pageDb = makePageDb()
 
 export {
     documentDb, 
-    userDb
+    userDb,
+    pageDb
 }

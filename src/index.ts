@@ -5,6 +5,7 @@ require('dotenv').config()
 
 import documentRoutes from './routes/documentRoutes'
 import userRoutes from './routes/userRoutes'
+import pageRoutes from './routes/pageRoutes'
 import schema from './schema'
 
 const app = express()
@@ -18,6 +19,7 @@ app.use('/graphql', graphqlHTTP({
 }))
 app.use('/api/documents', documentRoutes)
 app.use('/api/users', userRoutes)
+app.use('/api/pages', pageRoutes)
 
 app.get('/', async (req, res) => {
     return res.send("This is for testing")

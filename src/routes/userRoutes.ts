@@ -4,6 +4,7 @@ import {
     loginUser,
     findUsers,
     updateUser,
+    removeUser,
     verifyToken
 } from '../use-cases/users'
 
@@ -69,13 +70,23 @@ router.get('/_id/:_id', async (req, res) => {
 })
 
 router.post('/_id/:_id', async (req, res) => {
-    const updatedInfo = req.body
+    const {updatedInfo, originalInfo} = req.body
     const {_id} = req.params
     try {
-        const response = await updateUser(_id, updatedInfo)
-        return res.json(response)
+        const token = await updateUser(_id, updatedInfo, originalInfo)
+        return res.cookie('auth-token', token).json({token})
     } catch(e) {
         return res.status(400).json({error: e.message})
+    }
+})
+
+router.delete('/_id/:_id', async (req, res) => {
+    const _id = req.params._id;
+    try {
+        const response = await removeUser(_id)
+        return res.json(response)
+    } catch(e) {
+        return res.json({error: e.message})
     }
 })
 

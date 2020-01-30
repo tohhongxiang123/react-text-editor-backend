@@ -60,7 +60,6 @@ export default () : IUserDB => {
 
     async function remove(_id: string) : Promise<{deletedCount: number, _id: string}> {
         const response = await pool.query(`DELETE FROM users WHERE _id::text=$1`, [_id])
-        console.log('REMOVE', response)
-        return {deletedCount: 1, _id}
+        return {deletedCount: response.rowCount, _id}
     }
 }

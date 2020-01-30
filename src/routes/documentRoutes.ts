@@ -19,10 +19,10 @@ router.get('/', async (req, res) => {
 })
 
 router.post('/create', async (req, res) => {
-    const {title, description, body, authorid, childof} = req.body
+    const {title, description, body, authorid, childof, pageid} = req.body
 
     try {
-        const response = await addDocument({title, description, body, authorid, childof})
+        const response = await addDocument({title, description, body, authorid, childof, pageid})
         return res.json(response)
     } catch(e) {
         return res.status(400).json({error: e.message})

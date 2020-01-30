@@ -23,6 +23,8 @@ const DocType = new GraphQLObjectType({
         title: { type: GraphQLString },
         description: { type: GraphQLString },
         body: { type: GraphQLString },
+        datecreated: {type: GraphQLString },
+        datemodified: { type: GraphQLString },
         author: {
             type: UserType,
             async resolve(parent, args) {
