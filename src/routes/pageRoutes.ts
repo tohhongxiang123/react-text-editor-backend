@@ -1,14 +1,16 @@
-import * as express from 'express'
+import express, { Request, Response } from 'express'
 import {
     addPage,
     deletePage,
     updatePage,
     findPages
 } from '../use-cases/pages'
+import handleAuth from './handleAuth'
+import { AuthenticatedRequest } from './routeTypes'
 
 const router = express.Router()
 
-router.get('/', async (req, res) => {
+router.get('/', async (req : Request, res : Response) => {
     const query = req.query;
 
     try {
@@ -19,7 +21,7 @@ router.get('/', async (req, res) => {
     }
 })
 
-router.post('/', async (req, res) => {
+router.post('/', async (req : Request, res : Response) => {
     const { title, authorid } = req.body
 
     try {
@@ -30,7 +32,7 @@ router.post('/', async (req, res) => {
     }
 })
 
-router.get('/_id/:_id', async (req, res) => {
+router.get('/_id/:_id', async (req : Request, res : Response) => {
     const _id = req.params._id
 
     try {
@@ -41,7 +43,7 @@ router.get('/_id/:_id', async (req, res) => {
     }
 })
 
-router.post('/_id/:_id', async (req, res) => {
+router.post('/_id/:_id', handleAuth, async (req : AuthenticatedRequest, res : Response) => {
     const {title, authorid} = req.body
     const _id = req.params._id
 
@@ -53,7 +55,7 @@ router.post('/_id/:_id', async (req, res) => {
     }
 })
 
-router.delete('/_id/:_id', async (req, res) => {
+router.delete('/_id/:_id', handleAuth, async (req : AuthenticatedRequest, res : Response) => {
     const _id = req.params._id
 
     try {

@@ -14,6 +14,8 @@ const PageType = new GraphQLObjectType({
     fields: () => ({
         _id: { type: GraphQLID },
         title: { type: GraphQLString },
+        datecreated: { type: GraphQLString },
+        datemodified: { type: GraphQLString },
         author: {
             type: UserType,
             async resolve(parent, args) {

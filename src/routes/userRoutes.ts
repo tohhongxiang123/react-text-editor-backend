@@ -1,4 +1,4 @@
-import * as express from 'express'
+import express, { Request, Response } from 'express'
 import {
     addUser,
     loginUser,
@@ -7,10 +7,17 @@ import {
     removeUser,
     verifyToken
 } from '../use-cases/users'
+import handleAuth from './handleAuth'
+import {AuthenticatedRequest} from './routeTypes'
 
 const router = express.Router()
 
-router.post('/register', async (req, res) => {
+router.get('/', handleAuth, async (req: AuthenticatedRequest, res: Response) => {
+    console.log({username: req.username, userid: req.userid})
+    return res.send('Hello world')
+})
+
+router.post('/register', async (req : Request, res : Response) => {
     const {username, password} = req.body
     try {
         const response = await addUser({username, password})
@@ -20,7 +27,7 @@ router.post('/register', async (req, res) => {
     }
 })
 
-router.post('/login', async (req, res) => {
+router.post('/login', async (req : Request, res : Response) => {
     const {username, password} = req.body
     try {
         const token = await loginUser(username, password)
@@ -30,7 +37,7 @@ router.post('/login', async (req, res) => {
     }
 })
 
-router.get('/search', async (req, res) => {
+router.get('/search', async (req : Request, res : Response) => {
     const query = req.query
     try {
         const users = await findUsers(query)
@@ -40,7 +47,7 @@ router.get('/search', async (req, res) => {
     }
 })
 
-router.get('/verify', async (req, res) => {
+router.get('/verify', async (req : Request, res : Response) => {
     const authHeader = req.headers['authorization']
 
     if (!authHeader) {
@@ -57,7 +64,7 @@ router.get('/verify', async (req, res) => {
     }
 })
 
-router.get('/_id/:_id', async (req, res) => {
+router.get('/_id/:_id', async (req : Request, res : Response) => {
     const {_id} = req.params
 
     try {
@@ -69,9 +76,13 @@ router.get('/_id/:_id', async (req, res) => {
     }
 })
 
-router.post('/_id/:_id', async (req, res) => {
+router.post('/_id/:_id', handleAuth, async (req : AuthenticatedRequest, res : Response) => {
     const {updatedInfo, originalInfo} = req.body
     const {_id} = req.params
+    const authenticatedUserId = req.userid
+
+    if (_id !== authenticatedUserId) return res.status(403).json({error: 'Not allowed to edit other users'})
+
     try {
         const token = await updateUser(_id, updatedInfo, originalInfo)
         return res.cookie('auth-token', token).json({token})
@@ -80,8 +91,11 @@ router.post('/_id/:_id', async (req, res) => {
     }
 })
 
-router.delete('/_id/:_id', async (req, res) => {
+router.delete('/_id/:_id', handleAuth, async (req : AuthenticatedRequest, res : Response) => {
     const _id = req.params._id;
+    const authenticatedUserId = req.userid
+
+    if (_id !== authenticatedUserId) return res.status(403).json({error: 'Not allowed to delete other users'})
     try {
         const response = await removeUser(_id)
         return res.json(response)
@@ -90,7 +104,7 @@ router.delete('/_id/:_id', async (req, res) => {
     }
 })
 
-router.get('/logout', async (req, res) => {
+router.get('/logout', async (req : Request, res : Response) => {
     return res.clearCookie('auth-token').send('Logged out')
 })
 

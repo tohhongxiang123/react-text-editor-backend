@@ -1,6 +1,6 @@
-import * as express from 'express'
-import * as graphqlHTTP from 'express-graphql'
-import * as cors from 'cors'
+import express, {Request,Response} from 'express'
+import graphqlHTTP from 'express-graphql'
+import cors from 'cors'
 require('dotenv').config()
 
 import documentRoutes from './routes/documentRoutes'
@@ -21,7 +21,7 @@ app.use('/api/documents', documentRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/pages', pageRoutes)
 
-app.get('/', async (req, res) => {
+app.get('/', async (req : Request, res : Response) => {
     return res.send("This is for testing")
 })
 
