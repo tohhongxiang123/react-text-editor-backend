@@ -10,17 +10,17 @@ export type User = {
 export const MIN_PASSWORD_LENGTH = 6
 export const MIN_USERNAME_LENGTH = 3
 
-const pool = new Pool({
-    user: process.env.PGUSER,
-    password: process.env.PGPASSWORD,
-    host: process.env.PGHOST,
-    port: parseInt(process.env.PORT),
-    database: process.env.DATABASE
-})
-
 export interface IUserDB extends IDB<User> {}
 
-export default () : IUserDB => {
+export default (pool: Pool) : IUserDB => {
+    pool.query(`CREATE TABLE IF NOT EXISTS users
+    (
+        _id uuid NOT NULL DEFAULT uuid_generate_v4(),
+        username character varying(255) COLLATE pg_catalog."default" NOT NULL,
+        password character varying(255) COLLATE pg_catalog."default" NOT NULL,
+        CONSTRAINT users_pkey PRIMARY KEY (_id),
+        CONSTRAINT username_unique UNIQUE (username)
+    )`)
     return Object.freeze({
         create,
         find,

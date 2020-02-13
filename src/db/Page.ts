@@ -1,14 +1,6 @@
 import { Pool } from 'pg'
 import { IDB } from './index'
 
-const pool = new Pool({
-    user: process.env.PGUSER,
-    password: process.env.PGPASSWORD,
-    host: process.env.PGHOST,
-    port: parseInt(process.env.PORT),
-    database: process.env.DATABASE
-})
-
 export type Page = {
     _id?: string,
     title: string,
@@ -17,7 +9,21 @@ export type Page = {
 
 export interface IPageDB extends IDB<Page> {}
 
-export default () : IPageDB => {
+export default (pool: Pool) : IPageDB => {
+    pool.query(`CREATE TABLE IF NOT EXISTS pages
+        (
+            _id uuid NOT NULL DEFAULT uuid_generate_v4(),
+            title character varying(255) COLLATE pg_catalog."default" NOT NULL,
+            datecreated timestamp without time zone DEFAULT now(),
+            datemodified timestamp without time zone DEFAULT now(),
+            authorid uuid NOT NULL,
+            CONSTRAINT pages_pkey PRIMARY KEY (_id),
+            CONSTRAINT pages_authorid_fkey FOREIGN KEY (authorid)
+                REFERENCES public.users (_id) MATCH SIMPLE
+                ON UPDATE NO ACTION
+                ON DELETE CASCADE
+        )`)
+
     return Object.freeze({
         find,
         update,

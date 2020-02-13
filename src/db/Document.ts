@@ -1,14 +1,6 @@
 import { Pool } from 'pg'
 import { IDB } from './index'
 
-const pool = new Pool({
-    user: process.env.PGUSER,
-    password: process.env.PGPASSWORD,
-    host: process.env.PGHOST,
-    port: parseInt(process.env.PORT),
-    database: process.env.DATABASE
-})
-
 export type Document = {
     title: string,
     description: string,
@@ -28,7 +20,34 @@ export type Error = {
     details?: any
 }
 
-export default () : IDocumentDB => {
+export default (pool: Pool) : IDocumentDB => {
+    pool.query(`
+    CREATE TABLE IF NOT EXISTS documents
+    (
+        _id uuid NOT NULL DEFAULT uuid_generate_v4(),
+        title character varying(255) COLLATE pg_catalog."default" NOT NULL,
+        description character varying(255) COLLATE pg_catalog."default" NOT NULL,
+        body text COLLATE pg_catalog."default" NOT NULL,
+        childof uuid,
+        authorid uuid NOT NULL,
+        datecreated timestamp without time zone DEFAULT now(),
+        datemodified timestamp without time zone DEFAULT now(),
+        pageid uuid NOT NULL,
+        CONSTRAINT documents_pkey PRIMARY KEY (_id),
+        CONSTRAINT documents_authorid_fkey FOREIGN KEY (authorid)
+            REFERENCES public.users (_id) MATCH SIMPLE
+            ON UPDATE NO ACTION
+            ON DELETE CASCADE,
+        CONSTRAINT documents_childof_fkey_cascade FOREIGN KEY (childof)
+            REFERENCES public.documents (_id) MATCH SIMPLE
+            ON UPDATE NO ACTION
+            ON DELETE CASCADE,
+        CONSTRAINT documents_pageid_fkey_cascade FOREIGN KEY (pageid)
+            REFERENCES public.pages (_id) MATCH SIMPLE
+            ON UPDATE NO ACTION
+            ON DELETE CASCADE
+    )
+    `)
     return Object.freeze({
         find,
         update,
